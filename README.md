@@ -1,8 +1,5 @@
 # litexplore
 
-> `litexplore` is still in an early beta state. It works and it's usable, but
-> there may be signficant changes happening.
-
 The current options to explore remote SQLite databases require running a service
 on the remote and make it listen on some port. Another option is SSH'ing to the
 remote instance and use the SQLite CLI to explore the database. **Litexplore** is a
@@ -12,6 +9,9 @@ connections without having to copy the full DB or manually use the CLI.
 It works by sending commands over an SSH connection. The connection is
 multiplexed and it's reused to send commands. This reduces the overhead of
 openning a new SSH connection to send each command.
+
+> NOTE: `litexplore` is still in an early beta state. It works and it's usable,
+> but there may be signficant changes happening.
 
 ## Requirements
 
