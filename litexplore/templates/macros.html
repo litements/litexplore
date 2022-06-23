@@ -1,0 +1,57 @@
+{% macro modal_message(modal_data) -%}
+<script>
+    if (confirm("{{ modal_data.message | safe }}")) {
+        console.log("{{ modal_data.ok | safe }}");
+        location.href = "{{ modal_data.ok | safe }}";
+    } else {
+        console.log("{{ modal_data.cancel | safe }}");
+        location.href = "{{ modal_data.cancel | safe }}";
+    };
+</script>
+{%- endmacro %}
+
+
+{% macro table(table_dict, nrows) -%}
+<table role="grid">
+    <thead>
+        <tr>
+            {% for colname in table_dict.keys() %}
+            {% if loop.first %}
+            <!-- round top-lef corner: rounded-tl-lg -->
+            <th scope="col">{{ colname | e }}</th>
+            {% elif loop.last %}
+            <!-- round top right corner: rounded-tr-lg -->
+            <th scope="col">{{ colname | e }}</th>
+            {% else %}
+            <th scope="col">{{ colname | e }}</th>
+            {% endif %}
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for i in range(0, nrows) %}
+        {% if loop.first %}
+        <!-- first row -->
+        <tr>
+            {% elif loop.last %}
+            <!-- last row -->
+        <tr>
+            {% else %}
+        <tr>
+            {% endif %}
+
+            {% for key in table_dict.keys() %}
+
+            {% if loop.first %}
+            <!-- <th scope="row"></th> -->
+            <td>{{ table_dict[key][i] | e}}</td>
+            {% else %}
+            <td>{{ table_dict[key][i] | e}}</td>
+            {% endif %}
+
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{%- endmacro %}

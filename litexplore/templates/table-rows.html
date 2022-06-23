@@ -1,0 +1,17 @@
+{% for i in range(0, nrows) %}
+{% if loop.last %}
+<tr hx-get="/view-table?{{ new_query }}" hx-push-url="true" hx-trigger="revealed" hx-swap="afterend">
+    {% else %}
+<tr>
+    {% endif %}
+
+    {% for key in table_dict.keys() %}
+    {% if fks.get((i, key)) %}
+    <td><a data-tooltip="Go to table {{ fks_data[key].ref_table.name }} where {{ key }} = {{ table_dict[key][i] | e }}"
+            href="{{ fks.get((i, key)) }}">{{ table_dict[key][i] | e}}</a></td>
+    {% else %}
+    <td>{{ table_dict[key][i] | e}}</td>
+    {% endif %}
+    {% endfor %}
+</tr>
+{% endfor %}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$(readlink -f "$0")")"/.. || exit
+
+curl -SsL "https://unpkg.com/htmx.org" -o static/js/htmx.min.js
+
+echo "done"

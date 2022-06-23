@@ -1,0 +1,43 @@
+name: Publish Python distribution to PyPI
+
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  build:
+    name: Build wheels and source distribution
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install build dependencies
+        run: python3 -m pip install --upgrade build
+
+      - name: Build source distribution
+        run: python3 -m build
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    needs:
+      - build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+          path: dist
+
+      - name: Push build artifacts to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.5.0
+        with:
+          user: __token__
+          password: ${{ secrets.GH_PYPI_TOKEN }}

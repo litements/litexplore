@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "litexplore"
+authors = [{ name = "Ricardo Ander-Egg", email = "rsubacc@gmail.com" }]
+description = "A small example package"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    # "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+]
+dependencies = [
+    "pydantic",
+    "fastapi",
+    "uvicorn[standard]",
+    "Jinja2",
+    "python-multipart",
+]
+dynamic = ["version"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/litements/litexplore"
+"Bug Tracker" = "https://github.com/litements/litexplore"
+"Documentation" = "https://github.com/litements/litexplore"
+
+[project.scripts]
+litexplore = "litexplore:__main__"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["litexplore"]
+
+[tool.hatch.build.targets.sdist]
+packages = ["litexplore"]
+support-legacy = true
+
+[tool.hatch.build]
+include = [
+    "litexplore/templates/*.html",
+    "litexplore/static/css/*.css",
+    "litexplore/static/js/*.js",
+    "litexplore/*.py",
+]
+exclude = [".github", "bin", "*.txt", "*.db", "fk_parse.py", "dbg.py"]
+
+[tool.hatch.version]
+path = "litexplore/__init__.py"
+
+# [tool.hatch.envs.test]
+# dependencies = ["pytest"]
+
+# [[tool.hatch.envs.test.matrix]]
+# python = ["3.9", "3.8", "3.10"]
+
+# [tool.hatch.envs.test.scripts]
+# ver = "python3 -c 'import sys; print(sys.executable)'"
+
+
+[tool.isort]
+profile = "black"
+known_third_party = ["fastapi", "pydantic", "starlette", "uvicorn"]
+
+
+[tool.mypy]
+disallow_any_generics = true
+disallow_subclassing_any = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+implicit_reexport = false
+strict_equality = true

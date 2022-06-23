@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- TODO: add lang=".." to html tag -->
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello!</title>
+    <meta name="description" content="description content" />
+    <meta name="author" content="author" />
+    <meta name="keywords" content="keywords" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='/css/pico.min.css') }}">
+    <script src="{{ url_for('static', path='/js/htmx.min.js') }}" defer></script>
+    <meta charset="UTF-8" />
+    <meta property="og:title" content="" />
+    <meta property="og:description" content="" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:site" content="@ricardo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="robots" content="noindex" />
+</head>
+
+<body>
+    <nav class="container">
+        <ul>
+            <li><a href="/tables" role="button"><strong>Tables</strong></a></li>
+        </ul>
+        <ul>
+            <li><a href="/disconnect" role="button" class="secondary outline">Disconnect</a></li>
+        </ul>
+    </nav>
+    {% block content %}
+    {% endblock content %}
+    {% block body_script %}
+    {% endblock body_script %}
+</body>
+
+</html>

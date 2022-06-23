@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$(readlink -f "$0")")"/.. || exit
+
+curl -SsL -o picocss.zip https://github.com/picocss/pico/archive/refs/heads/master.zip
+unzip -p picocss.zip pico-master/css/pico.min.css > static/css/pico.min.css
+rm picocss.zip
+
+echo "done"

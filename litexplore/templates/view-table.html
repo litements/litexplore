@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container">
+    <h1>{{ table_name }}</h1>
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    {% for colname in table_dict.keys() %}
+                    <th scope="col">{{ colname | e }}
+                        <!-- <input type="text"></input> -->
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% include "table-rows.html" %}
+            </tbody>
+        </table>
+        {# {{ m.table(table_dict=table_dict, nrows=nrows) }} #}
+    </figure>
+</main>
+{% endblock content %}

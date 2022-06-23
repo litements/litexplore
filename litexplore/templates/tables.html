@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "macros.html" as m %}
+
+{% block content %}
+
+<main class="container">
+    <ul>
+        {% for tabname in tables %}
+        <li><a href="view-table?tname={{ tabname }}">{{ tabname }}</a></li>
+        {% endfor %}
+    </ul>
+</main>
+
+{% endblock content %}

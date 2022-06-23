@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- <form id="fid" method="GET" action="/ex204">
+
+</form>
+<button form="fid">GET</button>
+<form id="fidp" method="POST" action="/ex204">
+
+</form>
+<div onclick="setTimeout(() => {alert('hey');}, '1000')">
+    <button form="fidp">POST</button>
+</div>
+<a href="/ex204">linky</a>
+<a href="/view-table">table1</a> -->
+
+<main class="container">
+    <form action="/start" method="POST">
+        <label for="ssh-host">Host</label>
+        <input type="text" id="ssh-host" name="ssh_host" placeholder="Remote ssh host" required>
+        <small>From your ~/.ssh/config</small>
+        <label for="sqlite-remote-path">Remote SQLite path</label>
+        <input type="text" id="sqlite-remote-path" name="sqlite_remote_path"
+            placeholder="/home/ubuntu/project/data.sqlite3" required>
+        <label for="sqlite-remote-bin">(Optional) Remote SQLite binary</label>
+        <input type="text" id="sqlite-remote-bin" name="sqlite_remote_bin" placeholder="/usr/bin/sqlite3">
+        <small>Location of the sqlite3 binary in the remote. If no option is provided, the default 'sqlite3' system
+            command
+            will be used (usually '/usr/bin/sqlite3')</small>
+        <button type="submit">Connect</button>
+    </form>
+</main>
+{% endblock content %}
