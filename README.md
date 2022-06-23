@@ -74,8 +74,8 @@ The main page is a form with 3 inputs.
 
 ## How it works
 
+See [this blog post](https://ricardoanderegg.com/posts/sqlite-remote-explorer-gui/)
+
 ## Roadmap
 
 See [roadmap issues](https://github.com/litements/litexplore/labels/roadmap)
-
-## Alternatives
