@@ -26,7 +26,7 @@ else:
         port=args.port,
         reload=False,
         log_level="info",
-        workers=2,
+        workers=1,
         proxy_headers=True,
         access_log=True,
         timeout_keep_alive=120,
