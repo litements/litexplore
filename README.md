@@ -1,5 +1,7 @@
 # litexplore
 
+![litexplore](https://user-images.githubusercontent.com/37962604/175427068-5df7d19d-41b2-4101-a7d6-83fd0d5ca21d.svg)
+
 The current options to explore remote SQLite databases require running a service
 on the remote and make it listen on some port. Another option is SSH'ing to the
 remote instance and use the SQLite CLI to explore the database. **Litexplore** is a
