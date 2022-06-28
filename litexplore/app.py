@@ -81,12 +81,12 @@ def get_logger() -> logging.Logger:
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "()": "uvicorn._logging.DefaultFormatter",
+                "()": "uvicorn.logging.DefaultFormatter",
                 "fmt": 'level=%(levelname)s message="%(message)s"',
                 "use_colors": None,
             },
             "access": {
-                "()": "uvicorn._logging.AccessFormatter",
+                "()": "uvicorn.logging.AccessFormatter",
                 "fmt": 'level=%(levelname)s address=%(client_addr)s request="%(request_line)s" status_code=%(status_code)s',
             },
             "app": {
@@ -152,6 +152,9 @@ static = StaticFiles(directory=str(settings.STATIC_DIR))
 
 
 def pp(*args, **kwargs):
+    """
+    Debug print.
+    """
     print(">" * 5, *args, **kwargs)
 
 
