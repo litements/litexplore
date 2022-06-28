@@ -19,8 +19,8 @@ classifiers = [
 ]
 dependencies = [
     "pydantic",
-    "fastapi",
-    "uvicorn[standard]>=0.18.0",
+    "fastapi~=0.78",
+    "uvicorn[standard]>=0.18.2",
     "Jinja2",
     "python-multipart",
 ]
