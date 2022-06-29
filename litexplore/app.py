@@ -458,7 +458,7 @@ async def tables(request: Request, conf: GlobalUserConfig = Depends(conf_cookie)
 
     data = run(
         ssh_host=conf.ssh_host,
-        cmd="select name from sqlite_master where type = 'table' and tbl_name != 'sqlite_sequence'",
+        cmd="select name from sqlite_master where type in ('table', 'view') and tbl_name != 'sqlite_sequence'",
         remote_sqlite_db=conf.remote_sqlite_path,
         remote_sqlite_bin=conf.remote_sqlite_bin,
     )
@@ -508,7 +508,7 @@ async def view_table(
     filt = ""
     if q:
         filt = f"where {q} "
-    _cmd = f"select _rowid_ as rowid, * from {table.name} {filt} limit :limit offset :offset"
+    _cmd = f"select * from {table.name} {filt} limit :limit offset :offset"
 
     table_fks = get_table_fks(
         table,
@@ -570,7 +570,7 @@ async def view_table(
         "new_query": u.query,
     }
 
-    if nrows == 0:
+    if nrows == 0 and hx_request:
         raise NoContent
 
     if hx_request:
