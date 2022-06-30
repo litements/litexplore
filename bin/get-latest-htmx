@@ -2,6 +2,6 @@
 
 cd "$(dirname "$(readlink -f "$0")")"/.. || exit
 
-curl -SsL "https://unpkg.com/htmx.org" -o static/js/htmx.min.js
+curl -SsL "https://unpkg.com/htmx.org" -o litexplore/static/js/htmx.min.js
 
 echo "done"
