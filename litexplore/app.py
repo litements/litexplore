@@ -315,16 +315,30 @@ def validate_remote_sqlite_cli(ssh_host: str, remote_sqlite_bin: str):
         )
 
 
+# The `arun` function has been adapted from a similar function in datasette-ripgrep
+# https://github.com/simonw/datasette-ripgrep/blob/883df3abf96eaba52f6c30ad664698b9c45cb19a/datasette_ripgrep/__init__.py#L9
+# datasette-ripgrep is under Apache 2.0 license.
+# https://tldrlegal.com/license/apache-license-2.0-(apache-2.0)
+# The changes to the function include:
+# * Different subprocess
+# * Passing stdin to the subprocess
+# * Raise JSON decoding errors
+# * Some extra logging messages specific to `litexplore`
 async def arun(
     ssh_host: str,
     cmd: str,
     remote_sqlite_db: str,
     remote_sqlite_bin: str,
+    write_query: bool = False,
     time_limit=60.0,
     max_lines=2000,
 ) -> Tuple[List[Dict[str, Union[str, int, float, bytes]]], bool]:
 
     log.debug(f"Running command: {cmd}")
+
+    open_mode = "?mode=ro"
+    if write_query:
+        open_mode = ""
 
     args = [
         "-o",
@@ -334,7 +348,7 @@ async def arun(
         "-o",
         f"ControlPath={SSH_SOCKET_DIR.name}/{ssh_host}.socket",
         ssh_host,
-        f"{remote_sqlite_bin} -json file://{remote_sqlite_db}?mode=ro",
+        f"{remote_sqlite_bin} -json file://{remote_sqlite_db}{open_mode}",
     ]
     proc = await asyncio.create_subprocess_exec(
         "ssh",
@@ -399,32 +413,6 @@ def run(ssh_host: str, cmd: str, remote_sqlite_db: str, remote_sqlite_bin: str):
             f"ControlPath={SSH_SOCKET_DIR.name}/{ssh_host}.socket",
             ssh_host,
             f"{remote_sqlite_bin} -json file://{remote_sqlite_db}?mode=ro",
-        ],
-        text=True,
-        capture_output=True,
-        input=cmd,
-        check=True,
-    )
-
-    if not p.stdout.strip():
-        return None
-
-    return json.loads(p.stdout.strip())
-
-
-def run_write(ssh_host: str, cmd: str, remote_sqlite_db: str, remote_sqlite_bin: str):
-
-    p = subprocess.run(
-        [
-            "ssh",
-            "-o",
-            "ControlPersist=5m",
-            "-o",
-            "ControlMaster=auto",
-            "-o",
-            f"ControlPath={SSH_SOCKET_DIR.name}/{ssh_host}.socket",
-            ssh_host,
-            f"{remote_sqlite_bin} -json file://{remote_sqlite_db}",
         ],
         text=True,
         capture_output=True,
