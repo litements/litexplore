@@ -15,7 +15,7 @@
     <meta property="og:title" content="" />
     <meta property="og:description" content="" />
     <meta property="og:type" content="website" />
-    <meta name="twitter:site" content="@ricardo" />
+    <meta name="twitter:site" content="@ricardoanderegg" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="robots" content="noindex" />
 </head>
@@ -23,8 +23,14 @@
 <body>
     <nav class="container">
         <ul>
-            <li><a href="/tables" role="button"><strong>Tables</strong></a></li>
+            <li><a href="/" role="button"><strong>Home</strong></a></li>
         </ul>
+        {% if request.cookies.get("ltx_conf") %}
+        <ul>
+            <li><a href="/tables" role="button">Tables</a></li>
+            <li><a href="/run-sql" class="outline" role="button">Run SQL</a></li>
+        </ul>
+        {% endif %}
         <ul>
             <li><a href="/disconnect" role="button" class="secondary outline">Disconnect</a></li>
         </ul>
