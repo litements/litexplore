@@ -1,4 +1,5 @@
 from uuid import uuid4
+import asyncio
 import tempfile
 import urllib.parse
 import json
@@ -222,6 +223,10 @@ class RemoteSqliteBinError(Exception):
     pass
 
 
+class QueryTimeoutError(Exception):
+    pass
+
+
 class NoContent(Exception):
     pass
 
@@ -245,16 +250,20 @@ def p_query(query: str, query_params: Dict[str, SQLiteValue]) -> str:
     return get_params_cmd(query_params) + "\n" + query
 
 
-def get_table_fks(
+async def get_table_fks(
     tname: TableName, *, ssh_host: str, remote_sqlite_path: str, remote_sqlite_bin: str
 ) -> Optional[Tuple[ForeignKey, ...]]:
 
-    fks = run(
+    fks, timeout = await arun(
         ssh_host=ssh_host,
         cmd=f"PRAGMA foreign_key_list({tname._escaped_name})",
         remote_sqlite_db=remote_sqlite_path,
         remote_sqlite_bin=remote_sqlite_bin,
     )
+
+    if timeout:
+        # TODO: Improve error message
+        raise QueryTimeoutError("Timeout")
 
     if not fks:
         return None
@@ -262,9 +271,9 @@ def get_table_fks(
     return tuple(
         ForeignKey(
             src_table=tname,
-            src_column=ColumnName(name=x["from"]),
-            ref_table=TableName(name=x["table"]),
-            ref_column=ColumnName(name=x["to"]),
+            src_column=ColumnName(name=x["from"]),  # type: ignore
+            ref_table=TableName(name=x["table"]),  # type: ignore
+            ref_column=ColumnName(name=x["to"]),  # type: ignore
         )
         for x in fks
     )
@@ -306,9 +315,78 @@ def validate_remote_sqlite_cli(ssh_host: str, remote_sqlite_bin: str):
         )
 
 
-def run(ssh_host: str, cmd: str, remote_sqlite_db: str, remote_sqlite_bin: str):
+async def arun(
+    ssh_host: str,
+    cmd: str,
+    remote_sqlite_db: str,
+    remote_sqlite_bin: str,
+    time_limit=60.0,
+    max_lines=2000,
+) -> Tuple[List[Dict[str, Union[str, int, float, bytes]]], bool]:
 
-    pp(cmd)
+    log.debug(f"Running command: {cmd}")
+
+    args = [
+        "-o",
+        "ControlPersist=5m",
+        "-o",
+        "ControlMaster=auto",
+        "-o",
+        f"ControlPath={SSH_SOCKET_DIR.name}/{ssh_host}.socket",
+        ssh_host,
+        f"{remote_sqlite_bin} -json file://{remote_sqlite_db}?mode=ro",
+    ]
+    proc = await asyncio.create_subprocess_exec(
+        "ssh",
+        *args,
+        stdout=asyncio.subprocess.PIPE,
+        stdin=asyncio.subprocess.PIPE,
+        # limit=1024 * 1024, # Use this to change the buffer size
+    )
+    assert proc.stdin
+    proc.stdin.write(cmd.encode())
+    proc.stdin.write_eof()
+    max_lines_hit = False
+    time_limit_hit = False
+
+    async def inner(results):
+        nonlocal max_lines_hit
+        while True:
+            try:
+                assert proc.stdout
+                line = await proc.stdout.readline()
+            except (asyncio.exceptions.LimitOverrunError, ValueError) as e:
+                log.exception(str(e))
+                # Skip 'Separator is not found, and chunk exceed the limit' lines
+                continue
+            if line == b"":
+                break
+            try:
+                results.append(json.loads(line.strip(b"[],\n")))
+            except json.decoder.JSONDecodeError:
+                log.error(f"Error decoding JSON line: {line}")
+                raise
+            if len(results) >= max_lines:
+                log.warning("Subprocess max lines hit")
+                max_lines_hit = True
+                break
+
+    results: List[Dict[str, Union[str, int, float, bytes]]] = []
+
+    try:
+        await asyncio.wait_for(inner(results), timeout=time_limit)
+    except asyncio.TimeoutError:
+        time_limit_hit = True
+    try:
+        proc.kill()
+    except OSError:
+        # Ignore 'no such process' error
+        pass
+    # We should have accumulated some results anyway
+    return results, time_limit_hit
+
+
+def run(ssh_host: str, cmd: str, remote_sqlite_db: str, remote_sqlite_bin: str):
 
     p = subprocess.run(
         [
@@ -394,6 +472,15 @@ async def remote_sqlite_exception_handler(
     return response
 
 
+@app.exception_handler(QueryTimeoutError)
+async def query_timeout_exception_handler(
+    request: Request, exc: QueryTimeoutError
+) -> HTMLResponse:
+    response = HTMLResponse(content=str(exc) + "<br></br><a href='/'>Home page</a>")
+    response.delete_cookie(settings.COOKIE_CONF)
+    return response
+
+
 @app.exception_handler(NoContent)
 async def no_content_exception_handler(request: Request, exc: NoContent) -> Response:
     response = Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -456,12 +543,16 @@ async def health(response: Response) -> Any:
 @app.get("/tables")
 async def tables(request: Request, conf: GlobalUserConfig = Depends(conf_cookie)):
 
-    data = run(
+    data, timeout = await arun(
         ssh_host=conf.ssh_host,
         cmd="select name from sqlite_master where type in ('table', 'view') and tbl_name != 'sqlite_sequence'",
         remote_sqlite_db=conf.remote_sqlite_path,
         remote_sqlite_bin=conf.remote_sqlite_bin,
     )
+
+    if timeout:
+        # TODO: Improve error message
+        raise QueryTimeoutError("Timeout")
 
     tables = [x["name"] for x in data] if data else []
 
@@ -510,7 +601,7 @@ async def view_table(
         filt = f"where {q} "
     _cmd = f"select * from {table.name} {filt} limit :limit offset :offset"
 
-    table_fks = get_table_fks(
+    table_fks = await get_table_fks(
         table,
         ssh_host=conf.ssh_host,
         remote_sqlite_path=conf.remote_sqlite_path,
@@ -525,12 +616,16 @@ async def view_table(
 
     cmd = p_query(_cmd, query_params)
 
-    data = run(
+    data, timeout = await arun(
         ssh_host=conf.ssh_host,
         cmd=cmd,
         remote_sqlite_db=conf.remote_sqlite_path,
         remote_sqlite_bin=conf.remote_sqlite_bin,
     )
+
+    if timeout:
+        # TODO: Improve error message
+        raise QueryTimeoutError("Timeout")
 
     if not data:
         data = [{}]
