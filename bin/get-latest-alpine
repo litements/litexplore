@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+cd "$(dirname "$(readlink -f "$0")")"/.. || exit
+
+curl -SsL "https://unpkg.com/alpinejs@3.x.x/dist/module.esm.js" -o litexplore/static/js/alpine.module.esm.js
+curl -SsL "https://unpkg.com/@alpinejs/persist@3.x.x/dist/module.esm.js" -o litexplore/static/js/alpine.persist.module.esm.js
+
+echo "done"
