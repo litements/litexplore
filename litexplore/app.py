@@ -489,7 +489,11 @@ async def query_timeout_exception_handler(
 async def query_syntax_exception_handler(
     request: Request, exc: QuerySyntaxError
 ) -> HTMLResponse:
-    # s = str(exc).replace("\n", "<br></br>")
+    # Here I'm using history.back(); because the browser should keep the query
+    # already. This avoids playing with the URL query parameters. I want the user
+    # to have the old query in the box after the error.
+    # TODO: show the error in the same /run-sql page instead of navigating away.
+    #       maybe using the "notifications" banners (also TODO)
     response = HTMLResponse(
         content=f"<pre>{str(exc)}</pre>"
         f"<button onclick='history.back();'>Go back</button>"
