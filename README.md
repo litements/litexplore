@@ -81,3 +81,15 @@ See [this blog post](https://ricardoanderegg.com/posts/sqlite-remote-explorer-gu
 ## Roadmap
 
 See [roadmap issues](https://github.com/litements/litexplore/labels/roadmap)
+
+## Lincese(s)
+
+- This Project: [MIT](https://github.com/litements/litexplore/blob/1a70c0bf6cc52ac7e9fdcaa1a22c113d9df823cc/LICENSE)
+
+- The `arun` function was originally adapted from datasette-ripgrep: [Apache 2.0](https://github.com/simonw/datasette-ripgrep/blob/03446464420130368582022eeb5944993f64ec8f/LICENSE)
+
+The code from Alpine JS and HTMX is also included in this repository. Those
+projects are under the following licenses:
+
+- Alpine JS: [MIT](https://github.com/alpinejs/alpine/blob/763e287842da1d9e0a32c52015cfd5c8f33dbac7/LICENSE.md)
+- HTMX: [BSD 2-Clause "Simplified" License](https://github.com/bigskysoftware/htmx/blob/299a9baa1df31bcee78f52677c4444095b5b3db2/LICENSE)
