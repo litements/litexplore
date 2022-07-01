@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="container">
+    <h1>SQL</h1>
+    <form method="get" action="/run-sql">
+        <label for="query">Query:</label>
+
+        <textarea id="sql-query-box" name="query" rows="10" cols="70" placeholder="SELECT 1;" autocorrect="off"
+            spellcheck="false" wrap="off" autofocus>{% if query %}{{ query }}{% endif %}</textarea>
+        <button>Run</button>
+
+        {% if table_dict %}
+        {% include "table.html" %}
+        {% endif %}
+
+    </form>
+</main>
+{% endblock content %}
