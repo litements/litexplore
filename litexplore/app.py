@@ -227,6 +227,14 @@ class QueryTimeoutError(Exception):
     pass
 
 
+class QuerySyntaxError(Exception):
+    def __init__(self, message, query: str):
+        # Call the base class constructor with the parameters it needs
+        super().__init__(message)
+
+        self.query = query
+
+
 class NoContent(Exception):
     pass
 
@@ -355,6 +363,7 @@ async def arun(
         *args,
         stdout=asyncio.subprocess.PIPE,
         stdin=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
         # limit=1024 * 1024, # Use this to change the buffer size
     )
     assert proc.stdin
@@ -362,6 +371,14 @@ async def arun(
     proc.stdin.write_eof()
     max_lines_hit = False
     time_limit_hit = False
+
+    if proc.returncode != 0:
+        assert proc.stderr
+
+        data = await proc.stderr.read()
+        pp(data)
+        if b"Parse error" in data:
+            raise QuerySyntaxError(data.decode(), query=cmd)
 
     async def inner(results):
         nonlocal max_lines_hit
@@ -465,7 +482,19 @@ async def query_timeout_exception_handler(
     request: Request, exc: QueryTimeoutError
 ) -> HTMLResponse:
     response = HTMLResponse(content=str(exc) + "<br></br><a href='/'>Home page</a>")
-    response.delete_cookie(settings.COOKIE_CONF)
+    return response
+
+
+@app.exception_handler(QuerySyntaxError)
+async def query_syntax_exception_handler(
+    request: Request, exc: QuerySyntaxError
+) -> HTMLResponse:
+    # s = str(exc).replace("\n", "<br></br>")
+    response = HTMLResponse(
+        content=f"<pre>{str(exc)}</pre>"
+        f"<button onclick='history.back();'>Go back</button>"
+        # f"<br></br><a href='/run-sql?query={urllib.parse.quote_plus(exc.query)}'>Go back</a>"
+    )
     return response
 
 
@@ -651,6 +680,7 @@ async def view_table(
         "fks_data": fks_data,
         "next_page": next_page,
         "new_query": u.query,
+        "autoscroll": True,
     }
 
     if nrows == 0 and hx_request:
@@ -660,6 +690,56 @@ async def view_table(
         return templates.TemplateResponse("table-rows.html", context=context)
 
     return templates.TemplateResponse("view-table.html", context=context)
+
+
+@app.get("/run-sql")
+async def run_sql_view(
+    request: Request,
+    conf: GlobalUserConfig = Depends(conf_cookie),
+    query: Optional[str] = None,
+):
+
+    if not query:
+        return templates.TemplateResponse("run-sql.html", {"request": request})
+
+    data, timeout = await arun(
+        ssh_host=conf.ssh_host,
+        cmd=query,
+        remote_sqlite_db=conf.remote_sqlite_path,
+        remote_sqlite_bin=conf.remote_sqlite_bin,
+    )
+
+    if timeout:
+        # TODO: Improve error message
+        raise QueryTimeoutError("Timeout")
+
+    if not data:
+        data = [{}]
+
+    table_dict = defaultdict(list)
+    nrows = 0
+
+    for res in data:
+        if not res:
+            continue
+        for k, v in res.items():
+            table_dict[k].append(v)
+        nrows += 1
+
+    context = {
+        "table_name": "Results",
+        "request": request,
+        "table_dict": table_dict,
+        "nrows": nrows,
+        "fks": {},
+        "fks_data": None,
+        "new_query": "",
+        "query": query,
+        "autoscroll": False,
+    }
+
+    response = templates.TemplateResponse("run-sql.html", context)
+    return response
 
 
 @app.get("/disconnect")
