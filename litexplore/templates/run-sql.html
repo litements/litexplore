@@ -7,6 +7,7 @@
 
         <textarea id="sql-query-box" name="query" rows="10" cols="70" placeholder="SELECT 1;" autocorrect="off"
             spellcheck="false" wrap="off" autofocus>{% if query %}{{ query }}{% endif %}</textarea>
+        <input type="hidden" value="1" name="run">
         <button>Run</button>
 
         {% if table_dict %}
