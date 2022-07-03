@@ -10,10 +10,10 @@ connections without having to copy the full DB or manually use the CLI.
 
 It works by sending commands over an SSH connection. The connection is
 multiplexed and it's reused to send commands. This reduces the overhead of
-openning a new SSH connection to send each command.
+openning a new SSH connection for each action.
 
 > NOTE: `litexplore` is still in an early beta state. It works and it's usable,
-> but there may be signficant changes happening.
+> but sime features are still in development.
 
 ## Requirements
 
@@ -47,7 +47,7 @@ litexplore
 
 4. Open your browser at `http://127.0.0.1:8000`
 
-_Note_: even though the server uses `0.0.0.0` as the default host, open the browser at `127.0.0.1`. Otherwise, cookies won't work and they're used to store the user config.
+_Note_: even though the server uses `0.0.0.0` as the default host, open the browser at `127.0.0.1`. Otherwise, cookies won't work and they're used to keep parts of the user config.
 
 Run `litexplore --help` to see other available options.
 
