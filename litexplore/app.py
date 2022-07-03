@@ -496,7 +496,8 @@ async def query_syntax_exception_handler(
     #       maybe using the "notifications" banners (also TODO)
     response = HTMLResponse(
         content=f"<pre>{str(exc)}</pre>"
-        f"<button onclick='history.back();'>Go back</button>"
+        f"<a href='/run-sql?query={urllib.parse.quote_plus(exc.query)}'>Go back</a>"
+        # f"<button onclick='history.back();'>Go back</button>"
         # f"<br></br><a href='/run-sql?query={urllib.parse.quote_plus(exc.query)}'>Go back</a>"
     )
     return response
@@ -701,10 +702,16 @@ async def run_sql_view(
     request: Request,
     conf: GlobalUserConfig = Depends(conf_cookie),
     query: Optional[str] = None,
+    run: Optional[int] = 0,
 ):
 
     if not query:
         return templates.TemplateResponse("run-sql.html", {"request": request})
+
+    if query and not run:
+        return templates.TemplateResponse(
+            "run-sql.html", {"request": request, "query": query}
+        )
 
     data, timeout = await arun(
         ssh_host=conf.ssh_host,
