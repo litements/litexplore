@@ -82,7 +82,7 @@ See [this blog post](https://ricardoanderegg.com/posts/sqlite-remote-explorer-gu
 
 See [roadmap issues](https://github.com/litements/litexplore/labels/roadmap)
 
-## Lincese(s)
+## Lincense(s)
 
 - This Project: [MIT](https://github.com/litements/litexplore/blob/1a70c0bf6cc52ac7e9fdcaa1a22c113d9df823cc/LICENSE)
 
