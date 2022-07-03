@@ -1,32 +1,39 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- <form id="fid" method="GET" action="/ex204">
 
-</form>
-<button form="fid">GET</button>
-<form id="fidp" method="POST" action="/ex204">
+<main class="container" x-data>
 
-</form>
-<div onclick="setTimeout(() => {alert('hey');}, '1000')">
-    <button form="fidp">POST</button>
-</div>
-<a href="/ex204">linky</a>
-<a href="/view-table">table1</a> -->
+    <form @submit="
+    $store.ltx.add_sqlite_path($event.target.elements.sqlite_remote_path.value);
+    $store.ltx.add_sqlite_bin($event.target.elements.sqlite_remote_bin.value)
+    " action="/start" method="POST">
 
-<main class="container">
-    <form action="/start" method="POST">
-        <label for="ssh-host">Host</label>
-        <input type="text" id="ssh-host" name="ssh_host" placeholder="Remote ssh host" required>
+        <label for="ssh_host">Host</label>
+        <input type="text" id="ssh_host" name="ssh_host" placeholder="Remote ssh host" required>
         <small>From your ~/.ssh/config</small>
-        <label for="sqlite-remote-path">Remote SQLite path</label>
-        <input type="text" id="sqlite-remote-path" name="sqlite_remote_path"
-            placeholder="/home/ubuntu/project/data.sqlite3" required>
-        <label for="sqlite-remote-bin">(Optional) Remote SQLite binary</label>
-        <input type="text" id="sqlite-remote-bin" name="sqlite_remote_bin" placeholder="/usr/bin/sqlite3">
+
+        <label for="sqlite_remote_path">Remote SQLite path</label>
+        <input type="text" id="sqlite_remote_path" name="sqlite_remote_path" list="suggested_paths"
+            placeholder="/home/ubuntu/project/data.sqlite3" autocomplete="on" required>
+        <datalist id="suggested_paths" x-data="{paths: $store.ltx.common_sqlite_paths}">
+            <template x-for="path in paths">
+                <option :value="path"></option>
+            </template>
+        </datalist>
+
+        <label for="sqlite_remote_bin">(Optional) Remote SQLite binary</label>
+        <input type="text" id="sqlite_remote_bin" name="sqlite_remote_bin" placeholder="/usr/bin/sqlite3"
+            list="suggested_binaries" autocomplete="on">
+        <datalist id="suggested_binaries" x-data="{paths: $store.ltx.common_sqlite_binaries}">
+            <template x-for="path in paths">
+                <option :value="path"></option>
+            </template>
+        </datalist>
         <small>Location of the sqlite3 binary in the remote. If no option is provided, the default 'sqlite3' system
             command
             will be used (usually '/usr/bin/sqlite3')</small>
+
         <button type="submit">Connect</button>
     </form>
 </main>
